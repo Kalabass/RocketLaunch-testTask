@@ -34,31 +34,20 @@ export function process(store, order) {
   };
 
   for (const curOrder of order) {
-    switch (curOrder.size.length) {
-      case 1: {
-        if (!stock[curOrder.size[0]] || stock[curOrder.size[0]] <= 0) {
-          return false;
-        }
-
-        stock[curOrder.size[0]]--;
-
-        updateResult(curOrder.size[0], curOrder.id);
-        removeOrdersById(curOrder.id);
-
-        break;
-      }
-
-      case 2: {
-        curOrder.size.forEach((curSize) => {
-          pendingOrders[curSize] ??= [];
-          pendingOrders[curSize].push(curOrder);
-        });
-
-        break;
-      }
-      default: {
+    const { id, size } = curOrder;
+    if (size.length === 1) {
+      if (!stock[size[0]] || stock[size[0]] <= 0) {
         return false;
       }
+      stock[size[0]]--;
+
+      updateResult(size[0], id);
+      removeOrdersById(id);
+    } else {
+      curOrder.size.forEach((curSize) => {
+        pendingOrders[curSize] ??= [];
+        pendingOrders[curSize].push(curOrder);
+      });
     }
   }
 
@@ -66,12 +55,11 @@ export function process(store, order) {
     size = Number(size);
     const currentOrders = [...pendingOrders[size]];
     for (const order of currentOrders) {
-      const [size1, size2] = order.size;
-
-      let preferredSize = order.masterSize === 's1' ? size1 : size2;
-      let alternativeSize = size === size1 ? size2 : size1;
-
       if (!stock[size] || stock[size] === 0) {
+        const [size1, size2] = order.size;
+
+        let preferredSize = order.masterSize === 's1' ? size1 : size2;
+        let alternativeSize = size === size1 ? size2 : size1;
         if (!stock[alternativeSize] || stock[alternativeSize] === 0) {
           return false;
         }

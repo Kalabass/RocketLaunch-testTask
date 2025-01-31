@@ -228,7 +228,6 @@ testCases.forEach(({ store, order, isPossible, mismatches }, index) => {
       result.assignment.length === order.length &&
       result.mismatches === mismatches);
 
-  // const passed = result === isPossible;
   console.log(`Test Case ${index + 1}: ${passed ? 'Passed' : 'Failed'}`);
   if (!passed) {
     console.log('Expected:', isPossible ? { mismatches } : false);
