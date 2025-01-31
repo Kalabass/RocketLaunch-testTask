@@ -14,9 +14,10 @@ export function process(store, order) {
     if (!isMatch) result.mismatches += 1;
   };
 
-  const stock = Object.fromEntries(
-    store.map(({ size, quantity }) => [size, quantity])
-  );
+  const stock = new Map();
+  for (const { size, quantity } of store) {
+    stock.set(size, (stock.get(size) || 0) + quantity);
+  }
 
   const pendingOrders = {};
 
@@ -30,11 +31,11 @@ export function process(store, order) {
   for (const curOrder of order) {
     switch (curOrder.size.length) {
       case 1: {
-        if (!stock[curOrder.size[0]] || stock[curOrder.size[0]] <= 0) {
+        if (!stock.get(curOrder.size[0]) || stock.get(curOrder.size[0]) <= 0) {
           return false;
         }
 
-        stock[curOrder.size[0]]--;
+        stock.set(curOrder.size[0], stock.get(curOrder.size[0]) - 1);
 
         updateResult(curOrder.size[0], curOrder.id);
         removeOrdersById(curOrder.id);
@@ -65,13 +66,12 @@ export function process(store, order) {
       let preferredSize = order.masterSize === 's1' ? size1 : size2;
       let alternativeSize = size === size1 ? size2 : size1;
 
-      if (!stock[size] || stock[size] === 0) {
-        if (!stock[alternativeSize] || stock[alternativeSize] === 0) {
+      if (!stock.get(size) || stock.get(size) === 0) {
+        if (!stock.get(alternativeSize) || stock.get(alternativeSize) === 0) {
           return false;
         }
 
-        stock[alternativeSize]--;
-
+        stock.set(alternativeSize, stock.get(alternativeSize) - 1);
         updateResult(
           alternativeSize,
           order.id,
@@ -88,14 +88,14 @@ export function process(store, order) {
     const [preferredSize, alternativeSize] =
       masterSize === 's1' ? [size1, size2] : [size2, size1];
 
-    if (stock[preferredSize] > 0) {
-      stock[preferredSize]--;
+    if (stock.get(preferredSize) > 0) {
+      stock.set(preferredSize, stock.get(preferredSize) - 1);
       updateResult(preferredSize, id);
       continue;
     }
 
-    if (stock[alternativeSize] > 0) {
-      stock[alternativeSize]--;
+    if (stock.get(alternativeSize) > 0) {
+      stock.set(alternativeSize, stock.get(alternativeSize) - 1);
       updateResult(alternativeSize, id, false);
       continue;
     }
