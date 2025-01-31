@@ -10,6 +10,12 @@ export function process(store, order) {
   const result = { stats: [], assignment: [], mismatches: 0 };
 
   const updateResult = (size, id, isMatch = true) => {
+    const foundSize = result.stats.find((item) => item.size === size);
+    if (foundSize) {
+      foundSize.quantity += 1;
+    } else {
+      result.stats.push({ size, quantity: 1 });
+    }
     result.assignment.push({ id, size });
     if (!isMatch) result.mismatches += 1;
   };
