@@ -41,7 +41,7 @@ export function process(store, order) {
 
         break;
       }
-      //наполняем pendingOrders
+
       case 2: {
         curOrder.size.forEach((curSize) => {
           pendingOrders[curSize] ??= [];
@@ -84,8 +84,9 @@ export function process(store, order) {
 
   for (const { id, size, masterSize } of orderCopy) {
     const [size1, size2] = size;
-    const preferredSize = masterSize === 's1' ? size1 : size2;
-    const alternativeSize = preferredSize === size1 ? size2 : size1;
+
+    const [preferredSize, alternativeSize] =
+      masterSize === 's1' ? [size1, size2] : [size2, size1];
 
     if (stock[preferredSize] > 0) {
       stock[preferredSize]--;

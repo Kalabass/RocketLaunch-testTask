@@ -202,6 +202,22 @@ const testCases = [
     isPossible: true,
     mismatches: 3,
   },
+  //17 то же самое что и 4, только изначально нет нулевых магазинов
+  {
+    store: [
+      { size: 1, quantity: 1 },
+      { size: 2, quantity: 2 },
+      { size: 3, quantity: 1 },
+      { size: 4, quantity: 1 },
+    ],
+    order: [
+      { id: 101, size: [1, 2], masterSize: 's2' },
+      { id: 102, size: [2, 3], masterSize: 's1' },
+      { id: 103, size: [1, 2], masterSize: 's2' },
+    ],
+    isPossible: true,
+    mismatches: 1,
+  },
 ];
 
 testCases.forEach(({ store, order, isPossible, mismatches }, index) => {
