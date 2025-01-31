@@ -9,9 +9,9 @@ export function process(store, order) {
 
   const result = { stats: [], assignment: [], mismatches: 0 };
 
-  const updateResult = (size, quantity, id, mismatch = 0) => {
+  const updateResult = (size, id, isMatch = true) => {
     result.assignment.push({ id, size });
-    result.mismatches += mismatch;
+    if (!isMatch) result.mismatches += 1;
   };
 
   const stock = Object.fromEntries(
@@ -36,7 +36,7 @@ export function process(store, order) {
 
         stock[curOrder.size[0]]--;
 
-        updateResult(curOrder.size[0], curOrder.size.length, curOrder.id);
+        updateResult(curOrder.size[0], curOrder.id);
         removeOrdersById(curOrder.id);
 
         break;
@@ -71,8 +71,12 @@ export function process(store, order) {
         }
 
         stock[alternativeSize]--;
-        const mismatch = preferredSize === alternativeSize ? 0 : 1;
-        updateResult(alternativeSize, 1, order.id, mismatch);
+
+        updateResult(
+          alternativeSize,
+          order.id,
+          preferredSize === alternativeSize
+        );
         removeOrdersById(order.id);
       }
     }
@@ -85,13 +89,13 @@ export function process(store, order) {
 
     if (stock[preferredSize] > 0) {
       stock[preferredSize]--;
-      updateResult(preferredSize, 1, id);
+      updateResult(preferredSize, id);
       continue;
     }
 
     if (stock[alternativeSize] > 0) {
       stock[alternativeSize]--;
-      updateResult(alternativeSize, 1, id, 1);
+      updateResult(alternativeSize, id, false);
       continue;
     }
 
