@@ -1,3 +1,26 @@
+/*
+	1.Сравниваем количество заказов и общее количество масок на складе
+		1.1 Если масок на складе меньше - возвращаем false
+	2.итерируемся по заказам
+		2.1 Для заказов с одним размер сразу проверяем склад
+			2.2 при отсутствии размера - возвращаем false
+			2.3 при наличии размера - обновляем result, уменьшаем количество на складе и удаляем заказ из orderCopy
+		2.2 Заказы с двумя размерами упаковываем в pendingOrders
+	3.Итерируемся по pendingOrders
+    3.1. Находим те заказы, один из размеров которых отсутствует на складе, для них:
+      3.1.1 Находим второй размер и проверяем склад на наличие 2 размера
+        3.1.1.1 Если и второго размера нет - возвращаем false 
+        3.1.1.2 Если второй размер есть - обновляем result, уменьшаем количество на складе и удаляем заказ из pendingOrders и orderCopy
+  4. Итерируемся по orderCopy
+    4.1 Проверяем есть ли предпочтительный размер на складе
+      4.1.1 Если есть - обновляем result и уменьшаем количество на складе 
+      4.1.2 Если нет - проверяем есть ли непредпочтительный размер на складе
+        4.1.2.1 Если есть - обновляем result и уменьшаем количество на складе 
+        4.1.2.2 Если нет - возвращаем false
+  5. сортируем stats в result
+  6. возвращаем result
+ */
+
 export function process(store, order) {
   let orderCopy = [...order];
 
@@ -6,6 +29,12 @@ export function process(store, order) {
     0
   );
   if (order.length > totalQuantity) return false;
+
+  const stock = Object.fromEntries(
+    store.map(({ size, quantity }) => [size, quantity])
+  );
+
+  const pendingOrders = {};
 
   const result = { stats: [], assignment: [], mismatches: 0 };
 
@@ -19,12 +48,6 @@ export function process(store, order) {
     result.assignment.push({ id, size });
     if (!isMatch) result.mismatches += 1;
   };
-
-  const stock = Object.fromEntries(
-    store.map(({ size, quantity }) => [size, quantity])
-  );
-
-  const pendingOrders = {};
 
   const removeOrdersById = (id) => {
     for (const key in pendingOrders) {
